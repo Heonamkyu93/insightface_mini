@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>WebCam Streaming</title>
+</head>
+<body>
+    
+    <img src="/video_feed" alt="WebCam Streaming" id="webcam-stream">
+
+    <button onclick="copyAndDisplayImage()">Capture </button>
+    <button onclick="uploadImg()">Upload </button>
+    <div id="display-container"></div>
+
+    <script>
+        function copyAndDisplayImage() {
+            const webcamStream = document.getElementById('webcam-stream');
+            const displayContainer = document.getElementById('display-container');
+
+            // 캔버스 생성 및 크기 설정
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 400;
+            const context = canvas.getContext('2d');
+
+            // 이미지 복사 및 크기 조절
+            context.drawImage(webcamStream, 0, 0, canvas.width, canvas.height);
+
+            // 이미지를 base64로 얻어옴
+            const imageDataURL = canvas.toDataURL('image/jpeg');
+
+            // 이미지를 새로운 이미지 태그에 적용
+            const copiedImage = new Image();
+            copiedImage.id = 'capImg'; // ID 추가
+            copiedImage.src = imageDataURL;
+            copiedImage.alt = 'Copied Image';
+            copiedImage.width = 400;
+            copiedImage.height = 400;
+
+            // 이전에 출력된 이미지를 지우고 새로운 이미지 출력
+            displayContainer.innerHTML = '';
+            displayContainer.appendChild(copiedImage);
+
+        }
+        function uploadImg(){
+            const fileInput = document.getElementById('capImg');
+            const responseMessageContainer = document.getElementById('response-message');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            axios.post('http://localhost:8000/uploadfile/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+            .then(response => {
+                responseMessageContainer.innerHTML = `File uploaded successfully. Filename: ${response.data.filename}`;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        }
+    </script>
+</body>
+</html>
