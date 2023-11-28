@@ -42,11 +42,10 @@ def webcam_stream2():
         ret, frame = cap.read()
         if(ret) :
             gray = cv2.cvtColor(frame,  cv2.COLOR_BGR2GRAY)    # 입력 받은 화면 Gray로 변환
-
             face2_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
             faces = face2_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+            
             # 검출된 얼굴 주위에 사각형을 그립니다.
-        
             if cv2.waitKey(1) != -1:
                 cv2.imwrite('photo.jpg', frame)
                 break
@@ -135,7 +134,7 @@ async def predict_api(image_file1: UploadFile):
         return "yes"
      else :
         return "no"
-
+# 테스트용 필요없음
 @app.get("/test")
 def test():
     img = cv2.imread('img/join.jpg')
@@ -173,24 +172,8 @@ def test():
 UPLOAD_FOLDER = "upimg"
 class ImageData(BaseModel):
     image: str
-    # 이미지 업로드를 처리하는 엔드포인트
-    #  img = cv2.imread('img/join.jpg')
-    #  faces1 = face.get(img)
-    #  contents1 = await file.read()
-    #  buffer1 = io.BytesIO(contents1)
-    #  pil_img1 = Image.open(buffer1)
-    #  cv_img1=np.array(pil_img1)
-    #  cv2.cvtColor(cv_img1,cv2.COLOR_RGB2BGR)
-    #  faces2 = face.get(cv_img1)
-    #  feat1 = np.array(faces1[0].normed_embedding, dtype=np.float32)
-    #  feats2 = np.array(faces2[0].normed_embedding, dtype=np.float32)
-    #  sims = np.dot(feat1,feats2)
-    #  if sims > 0.55:
-    #     print('yes')
-    #     return "yes"
-    #  else :
-    #     print('no')
-    #     return "no"
+
+# 디비에서 가져온 파일이름 경로를 이용해서 폴더에서 파일을 긁어오는 함수    
 def read_images(img_instances: List[Img]) -> List:
     images = []
     for img_instance in img_instances:
@@ -199,6 +182,7 @@ def read_images(img_instances: List[Img]) -> List:
         image = cv2.imread(img_path+"/"+img_name)
         images.append(image)
     return images
+# index 에서 axios 를 사용해서 이미지를 보내면 디비에서 가져온 정보로 파일을 긁어오고 비교후 출입 가능여부를 반환하는 함수
 @app.post("/uploadfile")
 async def create_upload_file(image_data: ImageData,session: Session = Depends(get_db)):
     img2: List[Img] = get_img(session=session)
@@ -220,7 +204,6 @@ async def create_upload_file(image_data: ImageData,session: Session = Depends(ge
         result = False
         for idx, image in enumerate(images):
                 
-                print(image)
                 faces1 = face.get(image)
                 feat1 = np.array(faces1[0].normed_embedding, dtype=np.float32)
 
@@ -234,7 +217,8 @@ async def create_upload_file(image_data: ImageData,session: Session = Depends(ge
                     return JSONResponse(content={"message": "접근금지"})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
-    
+
+# save html에서 axios로 이미지 업로드하면 파일 정보를 디비에 저장하고 저장소에 저장하는 메소드    
 @app.post("/img_save")
 async def create_upload_file(image_data: ImageData,session: Session = Depends(get_db)):
     try:
@@ -257,7 +241,7 @@ async def create_upload_file(image_data: ImageData,session: Session = Depends(ge
         return JSONResponse(content={"message": "등록완료 출근하세요"})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
-    
+# 디비 테스트 필요없음    
 @app.get("/db")
 async def root(session: Session = Depends(get_db)):
     img: List[Img] = get_img(session=session)
@@ -269,6 +253,7 @@ async def root(session: Session = Depends(get_db)):
         return {"img_name": name, "img_path": path}
     finally:
         db.close()
+# 디비 테스트 필요없음
 @app.get("/db2")
 async def root(session: Session = Depends(get_db)):
     img: List[Img] = get_img(session=session)
