@@ -14,3 +14,9 @@ def create_img(db, img_name: str, img_path: str):
     db.commit()
     db.refresh(db_img)
     return db_img
+
+
+def delete_img(db,id:int):
+    data = db.query(Img).filter(Img.id == id).first()
+    db.delete(data)
+    db.commit()

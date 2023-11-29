@@ -33,8 +33,9 @@ from database import engine
 from PIL import Image
 from io import BytesIO
 from database import SessionFactory
-from repository import create_img
+from repository import create_img ,delete_img
 import uuid
+
 # 웹캠 안면 인식하는 함수
 def webcam_stream2():
     cap = cv2.VideoCapture(0)
@@ -258,9 +259,33 @@ async def root(session: Session = Depends(get_db)):
 async def root(session: Session = Depends(get_db)):
     img: List[Img] = get_img(session=session)
     return img
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 이 부분을 필요에 따라 실제 도메인으로 변경하세요.
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/upimg", StaticFiles(directory="upimg"), name="upimg")
+@app.get("/admin",response_class=HTMLResponse)
+async def admin(request: Request,session: Session = Depends(get_db)):
+     img: List[Img] = get_img(session=session)
+     context = {"request": request, "message": img}
+     return templates.TemplateResponse("admin.html", {"request": request, **context})
 
 
-
+class Del_name(BaseModel):
+    del_id: int
+    del_name: str
+@app.post("/delete_img")   # 해야할일 db에서 데이터가 지워지니깐 로컬에 저장소에있는 파일을 직접 지울것
+async def del_img(Del_name: Del_name,session: Session = Depends(get_db) ):
+    delete_img(session, Del_name.del_id)
+    file_path='upimg/'+Del_name.del_name
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    return JSONResponse(content={"message": "test"})
 
 
 

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>삭제</title>
+</head>
+<body>
+    <nav id="navbar-example2" class="navbar bg-body-tertiary px-3 mb-3">
+        <a class="navbar-brand" href="/">출근</a>
+        <ul class="nav nav-pills">
+          <li class="nav-item">
+            <a class="nav-link" href="./save">등록</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./">출근하기</a>
+            </li>
+          
+        </ul>
+      </nav>
+
+
+
+
+
+    <div class="container">
+       
+                {% for item in message %}
+                <div class="row">
+                  <div class="col-md-4"></div>
+                  <div class="col-md-4">
+                    <ul>
+                <img src="{{ item.img_path }}/{{ item.img_name }}" alt="Dynamic Image">
+              </ul>
+            </div>
+            <input type="hidden" id="hi{{item.id}}" value="{{item.img_name}}">
+            <div class="col-md-4"><button class="btn btn-primary" id="{{item.id}}" onclick="del(this);">삭제</button></div>
+        </div>
+                {% endfor %}
+          
+
+    </div>
+    <script>
+    function del(btn) {
+    let btn_id = btn.id;
+    let img_name=document.getElementById('hi'+btn_id).value;
+    let data={"del_id": parseInt(btn_id),
+                  "del_name":img_name}
+    let jsonString = JSON.stringify(data);
+    console.log(jsonString);
+    axios.post('./delete_img',data)
+        .then(response => {
+          location.reload();
+        })
+        .catch(error => {
+            console.error('Error uploading image:', error);
+        });
+}
+
+    </script>
+</body>
+</html>
