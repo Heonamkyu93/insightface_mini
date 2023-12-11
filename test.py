@@ -17,3 +17,5 @@ def get_stream_video():
             frame = buffer.tobytes()
             yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' +
                bytearray(frame) + b'\r\n')
+
+               ## 테스트
